@@ -18,7 +18,7 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text='Тестовый пост',
+            text='Какой-то текст!',
         )
 
     def test_models_have_correct_object_names(self):
@@ -28,5 +28,9 @@ class PostModelTest(TestCase):
         self.assertEqual(expected_object_name_group, str(group))
 
         post = PostModelTest.post
-        expected_object_name_post = post.text[:15]
-        self.assertEqual(expected_object_name_post, str(post))
+        expected_object_names = {
+            post: post.text[:15],
+        }
+        for field, expected in expected_object_names.items():
+            with self.subTest(field=field):
+                self.assertEqual(expected, str(post))

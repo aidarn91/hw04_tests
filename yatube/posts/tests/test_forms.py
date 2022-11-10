@@ -19,7 +19,7 @@ class PostFormTests(TestCase):
         )
 
         cls.post = Post.objects.create(
-            text='Тестовый заголовок',
+            text='Тестовый пост',
             author=cls.author,
         )
         cls.guest_client = Client()
@@ -39,17 +39,25 @@ class PostFormTests(TestCase):
             follow=True
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
-        self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
+        self.assertTrue(Post.objects.filter(
+            text='Тестовый текст',
+            group=self.group.pk).exists())
 
     def test_edit_post(self):
-        old_post = self.post
         form_data = {
-            'text': 'Новый тестовый текст',
+            'text': 'Новый текст поста',
+            'group': self.group.pk,
         }
-        self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': '1'}),
-            data=form_data,
-            follow=True
-        )
-        new_post = Post.objects.get(id=1)
-        self.assertNotEqual(old_post.text, new_post.text)
+        self.authorized_client.post(reverse(
+            'posts:post_edit',
+            kwargs={'post_id': self.post.id},
+        ), data=form_data)
+        response = self.authorized_client.get(reverse(
+            'posts:post_detail',
+            kwargs={'post_id': self.post.id},
+        ))
+        self.assertEqual(response.context['post'].text, 'Новый текст поста')
+        self.assertTrue(Post.objects.filter(
+            text='Новый текст поста',
+            group=self.group.pk,
+        ).exists())

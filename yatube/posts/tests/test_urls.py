@@ -12,27 +12,24 @@ class PostURLTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.user = User.objects.create(username="test_user",)
+        cls.user = User.objects.create(username='test_user',)
 
         cls.group = Group.objects.create(
-            id="10",
-            title="группа",
-            slug="one_group",
-            description="проверка описания",
+            title='группа',
+            slug='one_group',
+            description='проверка описания',
         )
 
         cls.post = Post.objects.create(
             text='Тестовый текст',
-            author=User.objects.get(username="test_user"),
-            group=Group.objects.get(title="группа"),
+            author=User.objects.get(username='test_user'),
+            group=Group.objects.get(title='группа'),
         )
 
         cls.post_url = f'/posts/{cls.post.id}/'
         cls.post_edit_url = f'/posts/{cls.post.id}/edit/'
         cls.public_urls = (
             ('/', 'index.html'),
-            (f'/group/{cls.group.slug}/', 'group.html'),
-            (f'/profile/{cls.user.username}/', 'profile.html'),
             (cls.post_url, 'post.html'),
         )
         cls.private_urls = (
@@ -50,16 +47,13 @@ class PostURLTests(TestCase):
 
     # Проверяем общедоступные страницы
     def test_public_pages(self):
-        for data in self.public_urls:
-            print(data[0])
-            response = self.guest_client.get(data[0])
-            self.assertEqual(response.status_code, 200)
+        response = self.guest_client.get('/')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем доступ для авторизованного пользователя и автора
     def test_private_pages(self):
-        for data in self.private_urls:
-            response = self.authorized_client.get(data[0])
-            self.assertEqual(response.status_code, HTTPStatus.OK)
+        response = self.authorized_client.get('/create/')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем статус 404 для авторизованного пользователя
     def test_task_list_url_redirect_anonymous(self):

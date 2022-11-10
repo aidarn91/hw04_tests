@@ -33,17 +33,22 @@ class PostPagesTests(TestCase):
         """URL-адрес использует соответствующий шаблон."""
         templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list', kwargs={
-                'slug': PostPagesTests.group.slug}): 'posts/group_list.html',
-            reverse('posts:profile', kwargs={
-                'username': PostPagesTests.user.username}):
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': PostPagesTests.group.slug}):
+                    'posts/group_list.html',
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostPagesTests.user.username}):
                     'posts/profile.html',
             reverse('posts:post_create'): 'posts/create_post.html',
-            reverse('posts:post_detail', kwargs={
-                'post_id': PostPagesTests.post.id}):
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': PostPagesTests.post.id}):
                     'posts/post_detail.html',
-            reverse('posts:post_edit', kwargs={
-                'post_id': PostPagesTests.post.id}):
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': PostPagesTests.post.id}):
                     'posts/create_post.html',
         }
         for reverse_name, template in templates_pages_names.items():
@@ -65,8 +70,7 @@ class PostPagesTests(TestCase):
     def test_group_pages_show_correct_context(self):
         """Шаблон группы"""
         response = self.authorized_client.get(reverse(
-            'posts:group_list',
-            kwargs={'slug': 'test_slug'}))
+            'posts:group_list', kwargs={'slug': 'test_slug'}))
         first_object = response.context['group']
         group_title_0 = first_object.title
         group_slug_0 = first_object.slug
@@ -101,6 +105,18 @@ class PostPagesTests(TestCase):
         self.assertEqual(response.context['author'].username, 'test_name')
         self.assertEqual(post_text_0, 'Тестовый текст')
 
+    def test_detail_page_show_correct_context(self):
+        """Шаблон post_detail.html сформирован с правильным контекстом."""
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post.id}))
+        first_object = response.context['post']
+        post_author_0 = first_object.author.username
+        post_text_0 = first_object.text
+        group_slug_0 = first_object.group.slug
+        self.assertEqual(post_author_0, 'test_name')
+        self.assertEqual(post_text_0, 'Тестовый текст')
+        self.assertEqual(group_slug_0, 'test_slug')
+
 
 class PostPaginatorTests(TestCase):
     @classmethod
@@ -112,12 +128,13 @@ class PostPaginatorTests(TestCase):
             slug='test_slug1',
             description='Тестовое описание1',
         )
-        for count_post in range(13):
-            cls.post = Post.objects.create(
-                text='Тестовый текст1',
-                author=cls.user,
-                group=cls.group
-            )
+        for post_number in range(13):
+            cls.post = Post.objects.bulk_create([
+                Post(
+                    text=f'Тестовый текст {post_number}',
+                    author=cls.user,
+                    group=cls.group
+                )])
 
     def setUp(self):
         self.guest_client = Client()
@@ -129,10 +146,9 @@ class PostPaginatorTests(TestCase):
             'posts:index': reverse('posts:index'),
             'posts:group_list': reverse(
                 'posts:group_list',
-                kwargs={'slug': PostPaginatorTests.group.slug}),
+                kwargs={'slug': 'test_slug1'}),
             'posts:profile': reverse(
-                'posts:profile',
-                kwargs={'username': PostPaginatorTests.user.username}),
+                'posts:profile', kwargs={'username': 'test_name1'}),
         }
         for template, reverse_name in paginator_list.items():
             response = self.guest_client.get(reverse_name)
@@ -142,12 +158,11 @@ class PostPaginatorTests(TestCase):
         paginator_list = {
             'posts:index': reverse('posts:index') + '?page=2',
             'posts:group_list': reverse(
-                'posts:group_list', kwargs={
-                    'slug': PostPaginatorTests.group.slug}) + '?page=2',
+                'posts:group_list',
+                kwargs={'slug': 'test_slug1'}) + '?page=2',
             'posts:profile': reverse(
-                'posts:profile', kwargs={
-                    'username': PostPaginatorTests.user.username})
-                + '?page=2',
+                'posts:profile',
+                kwargs={'username': 'test_name1'}) + '?page=2',
         }
         for template, reverse_name in paginator_list.items():
             response = self.guest_client.get(reverse_name)
