@@ -30,6 +30,8 @@ class PostURLTests(TestCase):
         cls.post_edit_url = f'/posts/{cls.post.id}/edit/'
         cls.public_urls = (
             ('/', 'index.html'),
+            (f'/group/{cls.group.slug}/', 'group.html'),
+            (f'/profile/{cls.user.username}/', 'profile.html'),
             (cls.post_url, 'post.html'),
         )
         cls.private_urls = (
@@ -47,12 +49,26 @@ class PostURLTests(TestCase):
 
     # Проверяем общедоступные страницы
     def test_public_pages(self):
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        url_names = (
+            '/',
+            '/group/one_group/',
+            '/profile/test_user/',
+            f'/posts/{self.post.pk}/',
+        )
+        for adress in url_names:
+            with self.subTest():
+                response = self.guest_client.get(adress)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем доступ для авторизованного пользователя и автора
     def test_private_pages(self):
-        response = self.authorized_client.get('/create/')
+        url_names = (
+            '/create/',
+            f'/posts/{self.post.pk}/edit/',
+        )
+        for adress in url_names:
+            with self.subTest():
+                response = self.authorized_client.get(adress)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем статус 404 для авторизованного пользователя
