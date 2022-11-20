@@ -33,19 +33,23 @@ class PostPagesTests(TestCase):
         """URL-адрес использует соответствующий шаблон."""
         templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list',
-                    kwargs={'slug': PostPagesTests.group.slug}
-                    ): 'posts/group_list.html',
-            reverse('posts:profile',
-                    kwargs={'username': PostPagesTests.user.username}
-                    ): 'posts/profile.html',
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': PostPagesTests.group.slug}
+            ): 'posts/group_list.html',
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostPagesTests.user.username}
+            ): 'posts/profile.html',
             reverse('posts:post_create'): 'posts/create_post.html',
-            reverse('posts:post_detail',
-                    kwargs={'post_id': PostPagesTests.post.id}
-                    ): 'posts/post_detail.html',
-            reverse('posts:post_edit',
-                    kwargs={'post_id': PostPagesTests.post.id}
-                    ): 'posts/create_post.html',
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': PostPagesTests.post.id}
+            ): 'posts/post_detail.html',
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': PostPagesTests.post.id}
+            ): 'posts/create_post.html',
         }
         for reverse_name, template in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -158,5 +162,15 @@ class PostPaginatorTests(TestCase):
             self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_ten_posts(self):
-        response = self.guest_client.get(reverse('posts:index') + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 3)
+        paginator_list = {
+            'posts:index': reverse('posts:index') + '?page=2',
+            'posts:group_list': reverse('posts:group_list',
+                                        kwargs={'slug': 'test_slug1'}
+                                        ) + '?page=2',
+            'posts:profile': reverse('posts:profile',
+                                     kwargs={'username': 'test_name1'}
+                                     ) + '?page=2',
+        }
+        for template, reverse_name in paginator_list.items():
+            response = self.guest_client.get(reverse_name)
+            self.assertEqual(len(response.context['page_obj']), 3)

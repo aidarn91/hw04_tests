@@ -28,16 +28,6 @@ class PostURLTests(TestCase):
 
         cls.post_url = f'/posts/{cls.post.id}/'
         cls.post_edit_url = f'/posts/{cls.post.id}/edit/'
-        cls.public_urls = (
-            ('/', 'index.html'),
-            (f'/group/{cls.group.slug}/', 'group.html'),
-            (f'/profile/{cls.user.username}/', 'profile.html'),
-            (cls.post_url, 'post.html'),
-        )
-        cls.private_urls = (
-            ('/create/', 'create_post.html'),
-            (cls.post_edit_url, 'create_post.html')
-        )
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -69,7 +59,7 @@ class PostURLTests(TestCase):
         for adress in url_names:
             with self.subTest():
                 response = self.authorized_client.get(adress)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем статус 404 для авторизованного пользователя
     def test_task_list_url_redirect_anonymous(self):
