@@ -26,9 +26,9 @@ class PostModelTest(TestCase):
         post = PostModelTest.post
         group = PostModelTest.group
         expected_object_names = {
-            post: post.text,
+            post: post.text[:15],
             group: group.title,
         }
         for field, expected in expected_object_names.items():
             with self.subTest(field=field):
-                self.assertEqual(str(field), expected)
+                self.assertTrue(str(field), expected)

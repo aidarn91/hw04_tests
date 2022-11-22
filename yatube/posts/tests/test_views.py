@@ -142,35 +142,30 @@ class PostPaginatorTests(TestCase):
         ]
         Post.objects.bulk_create(cls.posts)
 
+        cls.paginator_list = {
+            'posts:index': reverse('posts:index'),
+            'posts:group_list': reverse(
+                'posts:group_list',
+                kwargs={'slug': 'test_slug1'}
+            ),
+            'posts:profile': reverse(
+                'posts:profile',
+                kwargs={'username': 'test_name1'}
+            ),
+        }
+
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
     def test_first_page_contains_ten_posts(self):
-        paginator_list = {
-            'posts:index': reverse('posts:index'),
-            'posts:group_list': reverse('posts:group_list',
-                                        kwargs={'slug': 'test_slug1'}
-                                        ),
-            'posts:profile': reverse('posts:profile',
-                                     kwargs={'username': 'test_name1'}
-                                     ),
-        }
-        for template, reverse_name in paginator_list.items():
+
+        for template, reverse_name in self.paginator_list.items():
             response = self.guest_client.get(reverse_name)
             self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_ten_posts(self):
-        paginator_list = {
-            'posts:index': reverse('posts:index') + '?page=2',
-            'posts:group_list': reverse('posts:group_list',
-                                        kwargs={'slug': 'test_slug1'}
-                                        ) + '?page=2',
-            'posts:profile': reverse('posts:profile',
-                                     kwargs={'username': 'test_name1'}
-                                     ) + '?page=2',
-        }
-        for template, reverse_name in paginator_list.items():
-            response = self.guest_client.get(reverse_name)
+        for tamplate, reverse_name in self.paginator_list.items():
+            response = self.guest_client.get(reverse_name, {'page': 2})
             self.assertEqual(len(response.context['page_obj']), 3)
