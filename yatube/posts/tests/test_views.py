@@ -161,11 +161,11 @@ class PostPaginatorTests(TestCase):
 
     def test_first_page_contains_ten_posts(self):
 
-        for template, reverse_name in self.paginator_list.items():
+        for template_, reverse_name in self.paginator_list.items():
             response = self.guest_client.get(reverse_name)
             self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_ten_posts(self):
-        for tamplate, reverse_name in self.paginator_list.items():
+        for template_, reverse_name in self.paginator_list.items():
             response = self.guest_client.get(reverse_name, {'page': 2})
             self.assertEqual(len(response.context['page_obj']), 3)
